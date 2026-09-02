@@ -6,10 +6,6 @@
 </head>
 <body>
 
-<!-- ================================================================
-     reminder for me save drawing as "background.jpg" in the same folder as this file
-     ================================================================ -->
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
@@ -35,7 +31,7 @@
     font-family:var(--font-body);
   }
 
-  /* ---------- background photo + da starfield ---------- */
+  /* ---------- background photo + stars ---------- */
   #stage{ position:relative; width:100%; height:100vh; overflow:hidden; }
   #bgImg{
     position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
@@ -63,17 +59,6 @@
   #scene{
     position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center;
     flex-direction:column; text-align:center; padding-bottom:22vh;
-  }
-  #portrait{
-    font-size:120px; line-height:1; filter:drop-shadow(0 0 20px rgba(255,0,60,.3));
-    animation:bob 3.6s ease-in-out infinite; user-select:none;
-    transition:opacity .6s var(--ease);
-  }
-  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);} }
-  #speakerBanner{
-    margin-top:18px; color:var(--gold); font-family:var(--font-ui);
-    font-size:14px; letter-spacing:2px; opacity:.85; min-height:18px;
-    transition:opacity .4s var(--ease);
   }
 
   /* companion cube made with css lol thanks google*/
@@ -259,8 +244,11 @@
   #replayBtn:hover{ background:var(--gold); }
 </style>
 
+/* add actual audio file here */
 <div id="stage">
+  <img id="bgImg" src="Portal wallpaper/Portal_cloudy.png" alt="" onerror="this.style.display='none'">
   <img id="bgImg" src="Portal wallpaper/Portal_flat.png" alt="" onerror="this.style.display='none'">
+  <audio id="bgMusic" src="sheltuh.wav" loop></audio>
   <div id="bgOverlay"></div>
   <div id="starLayer"></div>
   <div id="wipe"></div>
@@ -273,7 +261,6 @@
   </div>
 
   <div id="scene">
-    <div id="portrait">🎂</div>
     <div id="speakerBanner"></div>
     <div class="cube-scene" id="sceneCube">
       <div class="cube">
@@ -372,6 +359,13 @@ const STORY = [
     id: "confirmed23",
     speaker: "Little gay person in your computer",
     lines: [ "Ok good", "all is in order", "you may read", "...", "my letter.", "Ok here goes nothing" ],
+    next: "trans",
+    transition: true
+  },
+    {
+    id: "trans",
+    speaker: "Dary",
+    lines: [ "..." ],
     next: "letter1",
     transition: true
   },
@@ -423,36 +417,14 @@ const STORY = [
     o.stop(audioCtx.currentTime + 0.13);
   }
 
-  const MELODY = [523,587,659,523,659,784,880,784,659,587,523,392];
-  let melodyStep = 0;
-  function musicTick(){
-    if(!musicOn) return;
-    ensureAudio();
-    const freq = MELODY[melodyStep % MELODY.length];
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = 'sine'; o.frequency.value = freq;
-    g.gain.value = 0.0001;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    g.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.05);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
-    o.stop(audioCtx.currentTime + 0.42);
-    melodyStep++;
-    musicTimer = setTimeout(musicTick, 300);
-  }
-
-  soundBtn.onclick = () => {
-    soundOn = !soundOn;
-    soundBtn.textContent = 'TEXT SOUND: ' + (soundOn ? 'ON' : 'OFF');
-    soundBtn.classList.toggle('on', soundOn);
-  };
+  const bgMusic = document.getElementById('bgMusic');
+  bgMusic.volume = 0.4;
   musicBtn.onclick = () => {
-    ensureAudio();
-    musicOn = !musicOn;
-    musicBtn.textContent = 'MUSIC: ' + (musicOn ? 'ON' : 'OFF');
-    musicBtn.classList.toggle('on', musicOn);
-    if(musicOn){ musicTick(); } else { clearTimeout(musicTimer); }
-  };
+  musicOn = !musicOn;
+  musicBtn.textContent = 'MUSIC: ' + (musicOn ? 'ON' : 'OFF');
+  musicBtn.classList.toggle('on', musicOn);
+  if(musicOn){ bgMusic.play(); } else { bgMusic.pause(); }
+};
 
   // ---------- starfield ----------
   const starLayer = $('starLayer');
@@ -473,7 +445,7 @@ const STORY = [
       wipe.style.transition = 'left .9s cubic-bezier(.7,0,.2,1)';
       wipe.style.left = '120%';
     });
-    setTimeout(onMid, 480);
+    setTimeout(() => { stage.classList.add('bg-swapped'); onMid(); }, 480);
   }
 
   // ---------- story engine yea woo ----------
