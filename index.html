@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>A Birthday Encounter</title>
+<title>Samir is 23 holy moly</title>
 </head>
 <body>
 
@@ -261,7 +261,6 @@
   </div>
 
   <div id="scene">
-    <div id="speakerBanner"></div>
     <div class="cube-scene" id="sceneCube">
       <div class="cube">
         <div class="cube-face front"></div>
@@ -317,8 +316,8 @@
    CONFIG — small settings
    ===================================================================== */
 const CONFIG = {
-  titleLine: "* A BIRTHDAY ENCOUNTER *<br>with SAMIR",
-  endingHeading: "HAPPY BIRTHDAY, SAMIR!"
+  titleLine: "*A LETTER*<br>for SAMIR",
+  endingHeading: "*This Visual Novel uses the arrow keys on your keyboard btw"
 };
 
 /*story*/
@@ -395,7 +394,6 @@ const STORY = [
   const $ = (id) => document.getElementById(id);
   const nameTag = $('nameTag'), textEl = $('text'), continueArrow = $('continueArrow');
   const choicesEl = $('choices'), dialogueWrap = $('dialogueWrap');
-  const speakerBanner = $('speakerBanner');
   const endScreen = $('endScreen'), endText = $('endText');
   const failScreen = $('failScreen'), failLineEl = $('failLine');
   const soundBtn = $('soundBtn'), musicBtn = $('musicBtn');
@@ -465,11 +463,6 @@ const STORY = [
   function enterNode(id){
     currentNode = nodesById[id];
     lineIndex = 0;
-    speakerBanner.style.opacity = 0;
-    setTimeout(() => {
-      speakerBanner.textContent = currentNode.speaker && !currentNode.narration ? currentNode.speaker : '';
-      speakerBanner.style.opacity = .85;
-    }, 150);
     showLine();
   }
 
@@ -559,7 +552,7 @@ const STORY = [
       const row = document.createElement('div');
       row.className = 'choiceRow' + (idx === 0 ? ' active' : '');
       row.textContent = c.label;
-      row.onclick = () => selectChoice(idx);
+      row.onclick = (e) => { e.stopPropagation(); selectChoice(idx); };
       choicesEl.appendChild(row);
     });
     choicesEl.classList.add('show');
