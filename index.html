@@ -357,14 +357,13 @@ const STORY = [
   {
     id: "confirmed23",
     speaker: "Little gay person in your computer",
-    lines: [ "Ok good", "all is in order", "you may read", "...", "my letter.", "Ok here goes nothing" ],
-    next: "trans",
-    transition: true
+    lines: [ "Ok good", "It seems all is in order", "give me a second to grant you access", "...",],
+    next: "trans"
   },
     {
     id: "trans",
-    speaker: "Dary",
-    lines: [ "..." ],
+    speaker: "System",
+    lines: [ "User SAMIR requesting access for file DaryLetter.exe", "...", "ACCESS GRANTED." ],
     next: "letter1",
     transition: true
   },
@@ -422,6 +421,12 @@ const STORY = [
   musicBtn.textContent = 'MUSIC: ' + (musicOn ? 'ON' : 'OFF');
   musicBtn.classList.toggle('on', musicOn);
   if(musicOn){ bgMusic.play(); } else { bgMusic.pause(); }
+};
+
+  soundBtn.onclick = () => {
+  soundOn = !soundOn;
+  soundBtn.textContent = 'TEXT SOUND: ' + (soundOn ? 'ON' : 'OFF');
+  soundBtn.classList.toggle('on', soundOn);
 };
 
   // ---------- starfield ----------
@@ -499,6 +504,7 @@ const STORY = [
         spans.push(null);
         continue;
       }
+      
       const span = document.createElement('span');
       span.className = 'ch';
       span.textContent = ch;
