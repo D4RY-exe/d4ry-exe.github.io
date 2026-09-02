@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>A Birthday Encounter</title>
+</head>
+<body>
+
+<!-- ================================================================
+     reminder for me save drawing as "background.jpg" in the same folder as this file
+     ================================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --void:      #06060a;
+    --box:       #000000;
+    --ink:       #fbf9f4;
+    --determination: #ff003c;
+    --gold:      #ffd400;
+    --gray:      #8b8b93;
+    --portal-orange: #ff6a1a;
+    --portal-blue:   #16c2ff;
+    --cube-pink:     #ff3d8a;
+    --font-body:     'VT323', monospace;
+    --font-ui:       'Press Start 2P', monospace;
+    --font-aperture: 'Orbitron', sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; height:100%; background:var(--void); overflow:hidden;
+    font-family:var(--font-body);
+  }
+
+  /* ---------- background photo + da starfield ---------- */
+  #stage{ position:relative; width:100%; height:100vh; overflow:hidden; }
+  #bgImg{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+  }
+  #bgOverlay{
+    position:absolute; inset:0; z-index:1;
+    background:linear-gradient(180deg, rgba(6,6,10,.55) 0%, rgba(6,6,10,.8) 65%, rgba(6,6,10,.95) 100%);
+  }
+  #starLayer{ position:absolute; inset:-8%; z-index:2; animation:drift 90s linear infinite; }
+  @keyframes drift{ from{transform:translate(0,0);} to{transform:translate(-3%,3%);} }
+  .star{
+    position:absolute; width:2px; height:2px; background:var(--ink); border-radius:50%;
+    opacity:.6; animation:twinkle 4s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.1;} 50%{opacity:.75;} }
+
+  /* aperture inspired watermark */
+  #apertureMark{
+    position:absolute; top:16px; left:18px; z-index:6;
+    font-family:var(--font-aperture); font-size:9px; letter-spacing:2px;
+    color:var(--gray); opacity:.55;
+  }
+
+  /* setting the scene */
+  #scene{
+    position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; text-align:center; padding-bottom:22vh;
+  }
+  #portrait{
+    font-size:120px; line-height:1; filter:drop-shadow(0 0 20px rgba(255,0,60,.3));
+    animation:bob 3.6s ease-in-out infinite; user-select:none;
+    transition:opacity .6s var(--ease);
+  }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);} }
+  #speakerBanner{
+    margin-top:18px; color:var(--gold); font-family:var(--font-ui);
+    font-size:14px; letter-spacing:2px; opacity:.85; min-height:18px;
+    transition:opacity .4s var(--ease);
+  }
+
+  /* companion cube made with css lol thanks google*/
+  .cube-scene{ perspective:700px; position:absolute; z-index:5; }
+  .cube{ width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:cubeSpin 9s linear infinite; }
+  .cube-face{
+    position:absolute; width:100%; height:100%;
+    background:linear-gradient(145deg,#d4d4c9,#8f8f86); border:2px solid #5c5c54;
+    box-shadow:inset 0 0 12px rgba(0,0,0,.35);
+  }
+  .cube-face::after{
+    content:''; position:absolute; width:34%; height:34%; left:50%; top:50%;
+    transform:translate(-50%,-58%);
+    background:var(--cube-pink);
+    clip-path:polygon(50% 15%,61% 0%,80% 0%,100% 20%,100% 40%,50% 100%,0% 40%,0% 20%,20% 0%,39% 0%);
+    opacity:.92; filter:drop-shadow(0 0 4px rgba(255,61,138,.6));
+  }
+  @keyframes cubeSpin{ from{transform:rotateY(0) rotateX(10deg);} to{transform:rotateY(360deg) rotateX(10deg);} }
+
+  #sceneCube{ --size:64px; width:var(--size); height:var(--size); left:8%; bottom:24vh; opacity:.9; }
+  #sceneCube .front{ transform:translateZ(calc(var(--size)/2)); }
+  #sceneCube .back{  transform:translateZ(calc(var(--size)/-2)) rotateY(180deg); }
+  #sceneCube .right{ transform:rotateY(90deg) translateZ(calc(var(--size)/2)); }
+  #sceneCube .left{  transform:rotateY(-90deg) translateZ(calc(var(--size)/2)); }
+  #sceneCube .top{   transform:rotateX(90deg) translateZ(calc(var(--size)/2)); }
+  #sceneCube .bottom{transform:rotateX(-90deg) translateZ(calc(var(--size)/2)); }
+
+  #endCube{ --size:120px; width:var(--size); height:var(--size); position:relative; margin:0 auto; opacity:1; }
+  #endCube .front{ transform:translateZ(calc(var(--size)/2)); }
+  #endCube .back{  transform:translateZ(calc(var(--size)/-2)) rotateY(180deg); }
+  #endCube .right{ transform:rotateY(90deg) translateZ(calc(var(--size)/2)); }
+  #endCube .left{  transform:rotateY(-90deg) translateZ(calc(var(--size)/2)); }
+  #endCube .top{   transform:rotateX(90deg) translateZ(calc(var(--size)/2)); }
+  #endCube .bottom{transform:rotateX(-90deg) translateZ(calc(var(--size)/2)); }
+
+  /* title */
+  #titleScreen{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:34px; z-index:20;
+    background:radial-gradient(ellipse at center, #0b0b12 0%, #000 78%);
+    transition:opacity .5s var(--ease);
+  }
+  #titleScreen h1{
+    font-family:var(--font-ui); color:var(--ink); font-size:22px;
+    text-align:center; line-height:2; text-shadow:0 0 12px rgba(255,255,255,.25);
+    letter-spacing:1px; padding:0 20px;
+  }
+  #titleHeart{
+    width:26px; height:26px; background:var(--determination);
+    clip-path:polygon(50% 15%,61% 0%,80% 0%,100% 20%,100% 40%,50% 100%,0% 40%,0% 20%,20% 0%,39% 0%);
+    animation:pulse 1.8s ease-in-out infinite;
+    filter:drop-shadow(0 0 10px rgba(255,0,60,.55));
+  }
+  @keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.14);} }
+  #startBtn{
+    font-family:var(--font-ui); font-size:13px; color:var(--void); background:var(--ink);
+    border:none; padding:14px 28px; cursor:pointer; letter-spacing:1px;
+    border-radius:22px; transition:background .3s var(--ease), transform .3s var(--ease);
+  }
+  #startBtn:hover{ background:var(--gold); transform:translateY(-2px); }
+
+  /* dialogue */
+  #dialogueWrap{
+    position:absolute; left:4vw; right:4vw; bottom:4vh; z-index:10;
+    opacity:0; transform:translateY(30px) scale(.985);
+    transition:opacity .55s var(--ease), transform .55s var(--ease);
+  }
+  #dialogueWrap.visible{ opacity:1; transform:translateY(0) scale(1); }
+
+  #box{
+    background:rgba(0,0,0,.78); backdrop-filter:blur(3px);
+    border:3px solid var(--ink); position:relative;
+    padding:24px 32px 20px; min-height:150px; border-radius:18px;
+    box-shadow:0 0 0 2px rgba(0,0,0,.6), 0 10px 40px rgba(0,0,0,.5), 0 0 30px rgba(255,255,255,.04);
+  }
+  #nameTag{
+    display:inline-block; font-family:var(--font-ui); font-size:13px;
+    color:var(--void); background:var(--gold); padding:7px 16px; margin:-42px 0 14px 6px;
+    border-radius:12px;
+    opacity:1; transform:translateY(0);
+    transition:opacity .3s var(--ease), transform .3s var(--ease), background-color .3s var(--ease);
+  }
+  #nameTag.hidden{ opacity:0; transform:translateY(-6px); pointer-events:none; }
+  #nameTag.narration{ background:var(--gray); }
+
+  #text{
+    color:var(--ink); font-size:29px; line-height:1.48; white-space:pre-wrap;
+    min-height:78px;
+  }
+  #text.narration{ color:var(--gray); font-style:italic; font-size:26px; }
+  #text.letterText{ text-align:center; font-size:31px; }
+  .ch{
+    display:inline-block; opacity:0; transform:translateY(5px); filter:blur(2px);
+    transition:opacity .38s var(--ease), transform .38s var(--ease), filter .38s var(--ease);
+  }
+  .ch.show{ opacity:1; transform:translateY(0); filter:blur(0); }
+
+  #continueArrow{
+    position:absolute; right:24px; bottom:16px; color:var(--ink);
+    font-size:18px; animation:arrowbounce 1.7s ease-in-out infinite; opacity:0;
+    transition:opacity .4s var(--ease);
+  }
+  #continueArrow.show{ opacity:.85; }
+  @keyframes arrowbounce{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(5px);} }
+
+  /* choices */
+  #choices{
+    margin-top:16px; display:none; flex-direction:column; gap:6px; position:relative;
+    padding-left:26px;
+  }
+  #choices.show{ display:flex; }
+  #choiceCursor{
+    position:absolute; left:0; top:0; width:15px; height:15px; background:var(--determination);
+    clip-path:polygon(50% 15%,61% 0%,80% 0%,100% 20%,100% 40%,50% 100%,0% 40%,0% 20%,20% 0%,39% 0%);
+    transition:top .28s var(--ease); filter:drop-shadow(0 0 6px rgba(255,0,60,.6));
+  }
+  .choiceRow{
+    padding:5px 4px; cursor:pointer;
+    font-size:26px; color:var(--ink);
+    transition:color .25s var(--ease), transform .25s var(--ease);
+  }
+  .choiceRow.active{ color:var(--gold); transform:translateX(4px); }
+
+  /* transition to diff bg */
+  #wipe{
+    position:absolute; top:0; bottom:0; width:55%; left:-70%; z-index:50; pointer-events:none;
+    background:linear-gradient(120deg, var(--portal-orange), var(--portal-blue));
+    filter:blur(6px); box-shadow:0 0 80px 30px rgba(255,255,255,.35);
+  }
+
+  /* fail scren */
+  #failScreen{
+    position:absolute; inset:0; z-index:40; display:none; align-items:center; justify-content:center;
+    flex-direction:column; gap:22px; overflow:hidden; text-align:center; padding:0 20px;
+  }
+  #failScreen.show{ display:flex; }
+  #failStripes{
+    position:absolute; inset:-60%; z-index:0;
+    background:repeating-linear-gradient(45deg, var(--portal-orange) 0 40px, #141414 40px 80px);
+    opacity:.85; animation:stripeMove 7s linear infinite;
+  }
+  @keyframes stripeMove{ from{transform:translate(0,0);} to{transform:translate(113px,113px);} }
+  #failScreen h2{
+    position:relative; z-index:1; font-family:var(--font-aperture); color:#fff; font-size:clamp(28px,6vw,42px);
+    letter-spacing:5px; text-shadow:0 2px 14px rgba(0,0,0,.85); margin:0;
+  }
+  #failScreen p{
+    position:relative; z-index:1; color:#fff; font-family:var(--font-body); font-size:24px;
+    text-shadow:0 2px 10px rgba(0,0,0,.9); max-width:520px; margin:0;
+  }
+  #retryBtn{
+    position:relative; z-index:1; font-family:var(--font-aperture); font-size:13px;
+    background:#111; color:var(--portal-blue); border:2px solid var(--portal-blue);
+    padding:14px 28px; cursor:pointer; letter-spacing:2px; border-radius:6px;
+    transition:background .25s var(--ease), color .25s var(--ease);
+  }
+  #retryBtn:hover{ background:var(--portal-blue); color:#111; }
+
+  /* top-right controls */
+  #controls{ position:absolute; top:14px; right:16px; z-index:30; display:flex; gap:10px; }
+  #controls button{
+    font-family:var(--font-ui); font-size:10px; background:transparent; color:var(--gray);
+    border:1px solid var(--gray); padding:8px 10px; cursor:pointer; letter-spacing:1px;
+    border-radius:14px; transition:color .25s var(--ease), border-color .25s var(--ease);
+  }
+  #controls button:hover{ color:var(--ink); border-color:var(--ink); }
+  #controls button.on{ color:var(--gold); border-color:var(--gold); }
+
+  /* end */
+  #endScreen{
+    position:absolute; inset:0; z-index:25; display:none; align-items:center; justify-content:center;
+    flex-direction:column; gap:26px; background:rgba(0,0,0,.9); text-align:center; padding:0 20px;
+    opacity:0; transition:opacity .6s var(--ease);
+  }
+  #endScreen.show{ display:flex; opacity:1; }
+  #endScreen h2{ font-family:var(--font-ui); color:var(--gold); font-size:20px; line-height:2; margin:0; }
+  #endScreen .sub{ font-family:var(--font-body); color:var(--gray); font-size:22px; max-width:480px; }
+  #replayBtn{
+    font-family:var(--font-ui); font-size:12px; color:var(--void); background:var(--ink);
+    border:none; padding:12px 22px; cursor:pointer; border-radius:20px;
+    transition:background .3s var(--ease);
+  }
+  #replayBtn:hover{ background:var(--gold); }
+</style>
+
+<div id="stage">
+  <img id="bgImg" src="Portal wallpaper/Portal_flat.png" alt="" onerror="this.style.display='none'">
+  <div id="bgOverlay"></div>
+  <div id="starLayer"></div>
+  <div id="wipe"></div>
+  <div id="apertureMark">FRIENDSHIP TESTING INITIATIVE</div>
+
+  <div id="titleScreen">
+    <div id="titleHeart"></div>
+    <h1 id="titleText">for SAMIR</h1>
+    <button id="startBtn">* You wanna press me so bad oooo</button>
+  </div>
+
+  <div id="scene">
+    <div id="portrait">🎂</div>
+    <div id="speakerBanner"></div>
+    <div class="cube-scene" id="sceneCube">
+      <div class="cube">
+        <div class="cube-face front"></div>
+        <div class="cube-face back"></div>
+        <div class="cube-face right"></div>
+        <div class="cube-face left"></div>
+        <div class="cube-face top"></div>
+        <div class="cube-face bottom"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="dialogueWrap">
+    <div id="box">
+      <div id="nameTag"></div>
+      <div id="text"></div>
+      <div id="continueArrow">▼</div>
+      <div id="choices"></div>
+    </div>
+  </div>
+
+  <div id="failScreen">
+    <div id="failStripes"></div>
+    <h2>TEST FAILED</h2>
+    <p id="failLine">The Enrichment Center regrets to inform you that you did not pass.</p>
+    <button id="retryBtn">▸ RETRY </button>
+  </div>
+
+  <div id="endScreen">
+    <div class="cube-scene" id="endCube">
+      <div class="cube">
+        <div class="cube-face front"></div>
+        <div class="cube-face back"></div>
+        <div class="cube-face right"></div>
+        <div class="cube-face left"></div>
+        <div class="cube-face top"></div>
+        <div class="cube-face bottom"></div>
+      </div>
+    </div>
+    <h2 id="endText"></h2>
+    <div class="sub">Happy Birthday ily :3</div>
+    <button id="replayBtn">* Talk again</button>
+  </div>
+
+  <div id="controls">
+    <button id="soundBtn">TEXT SOUND: OFF</button>
+    <button id="musicBtn">MUSIC: OFF</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — small settings
+   ===================================================================== */
+const CONFIG = {
+  titleLine: "* A BIRTHDAY ENCOUNTER *<br>with SAMIR",
+  endingHeading: "HAPPY BIRTHDAY, SAMIR!"
+};
+
+/*story*/
+const STORY = [
+  {
+    id: "start",
+    speaker: "Little gay person in your computer",
+    lines: [ "Hello!", "Are you Samir?" ],
+    choices: [
+      { label: "Yes", next: "isSamir" },
+      { label: "No", next: "notSamir" }
+    ]
+  },
+  {
+    id: "notSamir",
+    speaker: "Little gay person in your computer",
+    lines: [ "Bro why are you here.", "You're not supposed to be here." ],
+    fail: true,
+    failLine: "Samir Access Only."
+  },
+  {
+    id: "isSamir",
+    speaker: "Little gay person in your computer",
+    lines: [ "Omg haiiiii :D", "You're 23 right?" ],
+    choices: [
+      { label: "Yes", next: "confirmed23" },
+      { label: "No", next: "notYet23" }
+    ]
+  },
+  {
+    id: "notYet23",
+    speaker: "Little gay person in your computer",
+    lines: [ "Girl come back when you're 23", "how did you find this anyways" ],
+    fail: true,
+    failLine: "Underage."
+  },
+  {
+    id: "confirmed23",
+    speaker: "Little gay person in your computer",
+    lines: [ "Ok good", "all is in order", "you may read", "...", "my letter.", "Ok here goes nothing" ],
+    next: "letter1",
+    transition: true
+  },
+  { id: "letter1", speaker: "Dary", letter: true, lines: [ "Samir," ], next: "letter2" },
+  { id: "letter2", speaker: "Dary", letter: true, lines: [ "AKA my day one," ], next: "letter3" },
+  { id: "letter3", speaker: "Dary", letter: true, lines: [ "We've watched each other grow the last 4 years," ], next: "letter4" },
+  { id: "letter4", speaker: "Dary", letter: true, lines: [ "which is crazy to think about tbh" ], next: "letter5" },
+  { id: "letter5", speaker: "Dary", letter: true, lines: [ "We sat next to each other our first and last day at Temple" ], next: "letter6" },
+  { id: "letter6", speaker: "Dary", letter: true, lines: [ "and I really do think there is something so poetic about that." ], next: "letter7" },
+  { id: "letter7", speaker: "Dary", letter: true, lines: [ "I wouldn't have it any other way though," ], next: "letter8" },
+  { id: "letter8", speaker: "Dary", letter: true, lines: [ "as you are one of the best people to have ever come into my life." ], next: "letter9" },
+  { id: "letter9", speaker: "Dary", letter: true, lines: [ "I hope that no matter what," ], next: "letter10" },
+  { id: "letter10", speaker: "Dary", letter: true, lines: [ "no matter how far apart we are," ], next: "letter11" },
+  { id: "letter11", speaker: "Dary", letter: true, lines: [ "we'll remain friends," ], next: "letter12" },
+  { id: "letter12", speaker: "Dary", letter: true, lines: [ "because I value the time we've spent together so very much." ], next: "letter13" },
+  { id: "letter13", speaker: "Dary", letter: true, lines: [ "Here's to your 23rd year of life" ], next: "letter14" },
+  { id: "letter14", speaker: "Dary", letter: true, lines: [ "and going to more concerts" ], next: "letter15" },
+  { id: "letter15", speaker: "Dary", letter: true, lines: [ "and furry raves" ], next: "letter16" },
+  { id: "letter16", speaker: "Dary", letter: true, lines: [ ":3" ], next: "letter17" },
+  { id: "letter17", speaker: "Dary", letter: true, lines: [ "-Darbledorf" ], end: true }
+];
+
+/* =====================================================================
+   Engine Power yea
+   ===================================================================== */
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const nameTag = $('nameTag'), textEl = $('text'), continueArrow = $('continueArrow');
+  const choicesEl = $('choices'), dialogueWrap = $('dialogueWrap');
+  const speakerBanner = $('speakerBanner');
+  const endScreen = $('endScreen'), endText = $('endText');
+  const failScreen = $('failScreen'), failLineEl = $('failLine');
+  const soundBtn = $('soundBtn'), musicBtn = $('musicBtn');
+  const wipe = $('wipe');
+
+  let audioCtx = null, soundOn = false, musicOn = false, musicTimer = null;
+  function ensureAudio(){ if(!audioCtx){ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } }
+
+  function blip(freq){
+    if(!soundOn) return;
+    ensureAudio();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq * 0.55;
+    g.gain.value = 0.0001;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.018, audioCtx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+    o.stop(audioCtx.currentTime + 0.13);
+  }
+
+  const MELODY = [523,587,659,523,659,784,880,784,659,587,523,392];
+  let melodyStep = 0;
+  function musicTick(){
+    if(!musicOn) return;
+    ensureAudio();
+    const freq = MELODY[melodyStep % MELODY.length];
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.value = 0.0001;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+    o.stop(audioCtx.currentTime + 0.42);
+    melodyStep++;
+    musicTimer = setTimeout(musicTick, 300);
+  }
+
+  soundBtn.onclick = () => {
+    soundOn = !soundOn;
+    soundBtn.textContent = 'TEXT SOUND: ' + (soundOn ? 'ON' : 'OFF');
+    soundBtn.classList.toggle('on', soundOn);
+  };
+  musicBtn.onclick = () => {
+    ensureAudio();
+    musicOn = !musicOn;
+    musicBtn.textContent = 'MUSIC: ' + (musicOn ? 'ON' : 'OFF');
+    musicBtn.classList.toggle('on', musicOn);
+    if(musicOn){ musicTick(); } else { clearTimeout(musicTimer); }
+  };
+
+  // ---------- starfield ----------
+  const starLayer = $('starLayer');
+  for(let i=0;i<70;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    starLayer.appendChild(s);
+  }
+
+  // ---------- Portal-style screen wipe idk i tried kinda ass ----------
+  function portalWipe(onMid){
+    wipe.style.transition = 'none';
+    wipe.style.left = '-70%';
+    requestAnimationFrame(() => {
+      wipe.style.transition = 'left .9s cubic-bezier(.7,0,.2,1)';
+      wipe.style.left = '120%';
+    });
+    setTimeout(onMid, 480);
+  }
+
+  // ---------- story engine yea woo ----------
+  const nodesById = {};
+  STORY.forEach(n => nodesById[n.id] = n);
+
+  let currentNode = null, lineIndex = 0, typing = false, typeTimer = null;
+  let choiceIndex = 0, activeChoices = [];
+
+  function startStory(){
+    $('titleScreen').style.opacity = '0';
+    setTimeout(() => { $('titleScreen').style.display = 'none'; }, 500);
+    dialogueWrap.classList.add('visible');
+    goToNode(STORY[0].id);
+  }
+
+  function enterNode(id){
+    currentNode = nodesById[id];
+    lineIndex = 0;
+    speakerBanner.style.opacity = 0;
+    setTimeout(() => {
+      speakerBanner.textContent = currentNode.speaker && !currentNode.narration ? currentNode.speaker : '';
+      speakerBanner.style.opacity = .85;
+    }, 150);
+    showLine();
+  }
+
+  function goToNode(id){
+    const node = nodesById[id];
+    if(node.transition){ portalWipe(() => enterNode(id)); }
+    else { enterNode(id); }
+  }
+
+  function showLine(){
+    choicesEl.classList.remove('show');
+    choicesEl.innerHTML = '';
+    continueArrow.classList.remove('show');
+
+    const isNarration = !!currentNode.narration;
+    const isLetter = !!currentNode.letter;
+    nameTag.classList.toggle('hidden', isNarration || isLetter || !currentNode.speaker);
+    nameTag.classList.toggle('narration', isNarration);
+    nameTag.textContent = currentNode.speaker || '';
+    textEl.classList.toggle('narration', isNarration);
+    textEl.classList.toggle('letterText', isLetter);
+
+    const line = currentNode.lines[lineIndex];
+    typeText(line);
+  }
+
+  function typeText(str){
+    typing = true;
+    textEl.innerHTML = '';
+    const spans = [];
+    for(const ch of str){
+      if(ch === '\n'){
+        textEl.appendChild(document.createElement('br'));
+        spans.push(null);
+        continue;
+      }
+      const span = document.createElement('span');
+      span.className = 'ch';
+      span.textContent = ch;
+      textEl.appendChild(span);
+      spans.push(span);
+    }
+    let i = 0;
+    clearInterval(typeTimer);
+    typeTimer = setInterval(() => {
+      if(i < spans.length){
+        const span = spans[i];
+        if(span){
+          span.classList.add('show');
+          if(span.textContent !== ' ') blip(320 + (i % 5) * 12);
+        }
+        i++;
+      } else {
+        clearInterval(typeTimer);
+        typing = false;
+        onLineFullyShown();
+      }
+    }, 20);
+  }
+
+  function skipTyping(){
+    clearInterval(typeTimer);
+    textEl.querySelectorAll('.ch').forEach(s => s.classList.add('show'));
+    typing = false;
+    onLineFullyShown();
+  }
+
+  function onLineFullyShown(){
+    const isLastLine = lineIndex === currentNode.lines.length - 1;
+    if(!isLastLine){
+      continueArrow.classList.add('show');
+    } else if(currentNode.choices){
+      renderChoices();
+    } else {
+      continueArrow.classList.add('show');
+    }
+  }
+
+  function renderChoices(){
+    activeChoices = currentNode.choices;
+    choiceIndex = 0;
+    choicesEl.innerHTML = '';
+    const cursor = document.createElement('div');
+    cursor.id = 'choiceCursor';
+    choicesEl.appendChild(cursor);
+    activeChoices.forEach((c, idx) => {
+      const row = document.createElement('div');
+      row.className = 'choiceRow' + (idx === 0 ? ' active' : '');
+      row.textContent = c.label;
+      row.onclick = () => selectChoice(idx);
+      choicesEl.appendChild(row);
+    });
+    choicesEl.classList.add('show');
+    requestAnimationFrame(positionCursor);
+  }
+
+  function positionCursor(){
+    const rows = [...choicesEl.querySelectorAll('.choiceRow')];
+    const cursor = $('choiceCursor');
+    if(!cursor || !rows[choiceIndex]) return;
+    cursor.style.top = (rows[choiceIndex].offsetTop + rows[choiceIndex].offsetHeight/2 - 7) + 'px';
+  }
+
+  function moveChoice(delta){
+    choiceIndex = (choiceIndex + delta + activeChoices.length) % activeChoices.length;
+    [...choicesEl.querySelectorAll('.choiceRow')].forEach((row,i)=> row.classList.toggle('active', i===choiceIndex));
+    positionCursor();
+    blip(440);
+  }
+
+  function selectChoice(idx){
+    blip(660);
+    goToNode(activeChoices[idx].next);
+  }
+
+  function advance(){
+    if(typing){ skipTyping(); return; }
+    if(currentNode.choices && choicesEl.classList.contains('show')){
+      selectChoice(choiceIndex);
+      return;
+    }
+    const isLastLine = lineIndex === currentNode.lines.length - 1;
+    if(!isLastLine){
+      lineIndex++;
+      showLine();
+      return;
+    }
+    if(currentNode.fail){ showFail(); return; }
+    if(currentNode.end){ showEnding(); return; }
+    if(currentNode.next){ goToNode(currentNode.next); }
+  }
+
+  function showFail(){
+    dialogueWrap.classList.remove('visible');
+    failLineEl.textContent = currentNode.failLine || 'The Enrichment Center regrets to inform you that you did not pass.';
+    failScreen.classList.add('show');
+  }
+
+  function showEnding(){
+    dialogueWrap.classList.remove('visible');
+    endText.textContent = CONFIG.endingHeading;
+    endScreen.classList.add('show');
+  }
+
+  $('retryBtn').onclick = () => {
+    failScreen.classList.remove('show');
+    dialogueWrap.classList.add('visible');
+    goToNode('start');
+  };
+
+  $('replayBtn').onclick = () => {
+    endScreen.classList.remove('show');
+    dialogueWrap.classList.add('visible');
+    goToNode('start');
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if($('titleScreen').style.display !== 'none') return;
+    if(e.code === 'ArrowUp' && activeChoices.length && choicesEl.classList.contains('show')){ moveChoice(-1); e.preventDefault(); }
+    else if(e.code === 'ArrowDown' && activeChoices.length && choicesEl.classList.contains('show')){ moveChoice(1); e.preventDefault(); }
+    else if(e.code === 'Space' || e.code === 'Enter'){ advance(); e.preventDefault(); }
+  });
+
+  dialogueWrap.addEventListener('click', advance);
+  $('startBtn').onclick = () => { ensureAudio(); startStory(); };
+  $('titleText').innerHTML = CONFIG.titleLine;
+})();
+</script>
+
+</body>
+</html>
